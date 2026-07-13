@@ -66,28 +66,43 @@ Deno.serve(async (req) => {
       return json({ error: "AI is not configured yet (missing GEMINI_API_KEY secret)." }, 500);
     }
 
-    const geminiResponse = await fetch(
-      "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent",
-      {
-        method: "POST",
-        headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
-        body: JSON.stringify({
-          contents: [
-            {
-              parts: [
-                { inline_data: { mime_type: "application/pdf", data: encodeBase64(pdfBytes) } },
-                { text: PROMPT + jobDescription },
-              ],
-            },
+    // Model availability varies by account age on the free tier; try the
+    // "latest" alias first, then explicit newer models.
+    const MODELS = [
+      "gemini-flash-latest",
+      "gemini-3-flash",
+      "gemini-3-flash-preview",
+      "gemini-2.5-flash",
+    ];
+    const requestBody = JSON.stringify({
+      contents: [
+        {
+          parts: [
+            { inline_data: { mime_type: "application/pdf", data: encodeBase64(pdfBytes) } },
+            { text: PROMPT + jobDescription },
           ],
-        }),
-      },
-    );
+        },
+      ],
+    });
 
-    if (!geminiResponse.ok) {
-      const detail = await geminiResponse.text();
-      console.error("Gemini error:", geminiResponse.status, detail);
-      const friendly = geminiResponse.status === 429
+    let geminiResponse: Response | null = null;
+    for (const model of MODELS) {
+      geminiResponse = await fetch(
+        `https://generativelanguage.googleapis.com/v1beta/models/${model}:generateContent`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json", "x-goog-api-key": apiKey },
+          body: requestBody,
+        },
+      );
+      if (geminiResponse.status !== 404) break; // 404 = model unavailable; try next
+      console.error(`Model ${model} unavailable, trying next`);
+    }
+
+    if (!geminiResponse || !geminiResponse.ok) {
+      const detail = geminiResponse ? await geminiResponse.text() : "no response";
+      console.error("Gemini error:", geminiResponse?.status, detail);
+      const friendly = geminiResponse?.status === 429
         ? "The free AI quota is exhausted for now — try again in a few minutes."
         : "The AI service returned an error. Try again shortly.";
       return json({ error: friendly }, 502);
