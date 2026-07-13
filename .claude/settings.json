@@ -2,17 +2,14 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
+      "Bash(npm install *)",
       "Bash(git add *)",
       "Bash(git commit -m ' *)",
       "Bash(git push *)",
-      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://jddocjpxikiqovmnvufi.supabase.co/rest/v1/rest/v1/rpc/username_available\" -X POST)",
-      "Bash(curl -s -w \"\\\\n%{http_code}\\\\n\" \"https://jddocjpxikiqovmnvufi.supabase.co/rest/v1/rpc/username_available\" -X POST)",
-      "Read(//tmp/**)",
-      "Bash(curl -s -X POST https://jddocjpxikiqovmnvufi.supabase.co/auth/v1/signup -H 'apikey: __TRACKED_VAR__' -H 'Content-Type: application/json' -d '{\"email\":\"__CMDSUB_OUTPUT__\",\"password\":\"TestSignup123!\",\"data\":{\"username\":\"cbtest__TRACKED_VAR__\",\"mobile\":\"\"}}')",
-      "Bash(grep -o '\"text\":\"[^\"]*\"' /tmp/mail.json | head -c 600; echo; grep -o 'Enter this code[^\"\\\\\\\\]*' /tmp/mail.json | head -c 300)",
-      "Bash(curl -s -w '\\\\nHTTP %{http_code}\\\\n' -X POST https://jddocjpxikiqovmnvufi.supabase.co/auth/v1/verify -H 'apikey: __TRACKED_VAR__' -H 'Content-Type: application/json' -d '{\"email\":\"__CMDSUB_OUTPUT__\",\"token\":\"66887387\",\"type\":\"signup\"}')",
+      "Bash(node -e ' *)",
       "Skill(claude-api)",
-      "Skill(claude-api:*)"
+      "Skill(claude-api:*)",
+      "Bash(git commit *)"
     ]
   }
 }

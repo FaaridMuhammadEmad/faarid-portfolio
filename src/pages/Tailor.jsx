@@ -60,22 +60,63 @@ export default function Tailor() {
     setInfo('Copied to clipboard.')
   }
 
-  function downloadResult(ext) {
-    const blob =
-      ext === 'doc'
-        ? new Blob(
-            [`<html><body><pre style="font-family:Calibri,Arial,sans-serif;white-space:pre-wrap">${result
-                .replaceAll('&', '&amp;')
-                .replaceAll('<', '&lt;')}</pre></body></html>`],
-            { type: 'application/msword' }
-          )
-        : new Blob([result], { type: 'text/plain' })
+  function downloadTxt() {
+    const blob = new Blob([result], { type: 'text/plain' })
     const url = URL.createObjectURL(blob)
     const a = document.createElement('a')
     a.href = url
-    a.download = `tailored-resume.${ext}`
+    a.download = 'tailored-resume.txt'
     a.click()
     URL.revokeObjectURL(url)
+  }
+
+  async function downloadPdf() {
+    const { jsPDF } = await import('jspdf')
+    const pdf = new jsPDF({ unit: 'pt', format: 'a4' })
+    const margin = 56
+    const pageWidth = pdf.internal.pageSize.getWidth()
+    const pageHeight = pdf.internal.pageSize.getHeight()
+    const maxWidth = pageWidth - margin * 2
+    let y = margin
+
+    const ensureRoom = (needed) => {
+      if (y + needed > pageHeight - margin) {
+        pdf.addPage()
+        y = margin
+      }
+    }
+    // Heading heuristic: a short line that is entirely uppercase.
+    const isHeading = (line) =>
+      line.length > 2 && line.length < 60 && line === line.toUpperCase() && /[A-Z]/.test(line)
+
+    for (const rawLine of result.split('\n')) {
+      const line = rawLine.trimEnd()
+      if (!line.trim()) {
+        y += 8
+        continue
+      }
+      if (isHeading(line.trim())) {
+        ensureRoom(34)
+        y += 10
+        pdf.setFont('helvetica', 'bold')
+        pdf.setFontSize(12.5)
+        pdf.text(line.trim(), margin, y)
+        y += 6
+        pdf.setDrawColor(180)
+        pdf.line(margin, y, pageWidth - margin, y)
+        y += 14
+      } else {
+        pdf.setFont('helvetica', 'normal')
+        pdf.setFontSize(10.5)
+        const wrapped = pdf.splitTextToSize(line, maxWidth)
+        for (const w of wrapped) {
+          ensureRoom(15)
+          pdf.text(w, margin, y)
+          y += 15
+        }
+      }
+    }
+    pdf.save('tailored-resume.pdf')
   }
 
   const isPdf = resumeUrl?.toLowerCase().endsWith('.pdf')
@@ -129,11 +170,11 @@ export default function Tailor() {
               <button className="btn-ghost-sm" onClick={copyResult}>
                 Copy
               </button>
-              <button className="btn-ghost-sm" onClick={() => downloadResult('txt')}>
-                Download .txt
+              <button className="btn-primary-sm" onClick={downloadPdf}>
+                Download PDF
               </button>
-              <button className="btn-ghost-sm" onClick={() => downloadResult('doc')}>
-                Download .doc
+              <button className="btn-ghost-sm" onClick={downloadTxt}>
+                Download .txt
               </button>
             </div>
           </div>
