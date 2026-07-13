@@ -204,6 +204,35 @@ code {
   border: 1px solid var(--line);
   color: var(--red);
 }
+.thumb-editorial {
+  background: #F7F3EA;
+  border: 1px solid #D9D2C3;
+  color: #B4552D;
+  font-family: Georgia, 'Times New Roman', serif;
+  font-style: italic;
+  text-transform: none;
+}
+.thumb-terminal {
+  background: #070B07;
+  border: 1px solid #1E2B1F;
+  color: #4AF06B;
+  font-family: var(--mono);
+  text-shadow: 0 0 18px rgba(74, 240, 107, 0.5);
+}
+.thumb-aurora {
+  background:
+    radial-gradient(circle at 80% 15%, rgba(45, 212, 191, 0.35), transparent 55%),
+    radial-gradient(circle at 15% 85%, rgba(139, 92, 246, 0.35), transparent 55%),
+    #0B1120;
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  color: #2DD4BF;
+}
+.thumb-brutalist {
+  background: #F2E94E;
+  border: 3px solid #111;
+  color: #111;
+  box-shadow: inset -6px -6px 0 #111;
+}
 .template-actions { display: flex; gap: 10px; margin-top: 14px; }
 
 /* ---- file list (resume) ---- */
