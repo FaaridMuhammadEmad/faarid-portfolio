@@ -2,7 +2,11 @@
   "permissions": {
     "allow": [
       "Bash(npm run *)",
-      "Bash(git add *)"
+      "Bash(git add *)",
+      "Bash(git commit -m ' *)",
+      "Bash(git push *)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\\\\n\" \"https://jddocjpxikiqovmnvufi.supabase.co/rest/v1/rest/v1/rpc/username_available\" -X POST)",
+      "Bash(curl -s -w \"\\\\n%{http_code}\\\\n\" \"https://jddocjpxikiqovmnvufi.supabase.co/rest/v1/rpc/username_available\" -X POST)"
     ]
   }
 }

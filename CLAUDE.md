@@ -18,6 +18,8 @@ Portfolio builder web app ("craftedBy" brand, `craftedby` machine name). Users s
 
 ## Deployment
 
+- **Versioning rule:** on every push to `main`, bump the patch version in `package.json` (e.g. 0.1.2 → 0.1.3) in the same commit, and tell the user the new version number in chat. The footer displays it (`VITE_APP_VERSION`, injected from `package.json` via `vite.config.js` define) so the user can confirm which build is deployed.
+
 - Target host: Vercel, project name `craftedby` (user creates/imports; `vercel.json` has the SPA rewrite). Set both env vars in Vercel.
 - Legacy GitHub Pages deploy still runs on push to `main` via `.github/workflows/deploy.yml` at https://faaridmuhammademad.github.io/craftedby/ — `vite.config.js` sets `base: '/craftedby/'` only when `GITHUB_ACTIONS` is set. Remove the workflow once Vercel is live.
 

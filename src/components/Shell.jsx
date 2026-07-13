@@ -51,7 +51,7 @@ export default function Shell() {
         <Outlet />
       </main>
       <footer className="app-foot">
-        craftedBy · portfolios, crafted by you
+        craftedBy · portfolios, crafted by you · v{import.meta.env.VITE_APP_VERSION}
       </footer>
     </div>
   )
