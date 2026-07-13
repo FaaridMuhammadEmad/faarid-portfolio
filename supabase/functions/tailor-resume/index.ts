@@ -1,7 +1,8 @@
-// craftedBy — AI resume tailoring (Supabase Edge Function, Deno runtime).
-// Receives a job description + the caller's resume URL, sends both to the
-// Gemini API (free tier), returns the tailored resume as plain text.
-// Deploy with "Verify JWT" enabled so only signed-in users can call it.
+// craftedBy — AI resume features (Supabase Edge Function, Deno runtime).
+// Two modes, selected by the request body:
+//   { resumeUrl, jobDescription }          → tailor the resume to a job (returns { tailored })
+//   { resumeUrl, mode: "extract" }         → extract structured portfolio data (returns { data })
+// Uses the Gemini API (free tier). Deploy with "Verify JWT" enabled.
 
 import { encodeBase64 } from "jsr:@std/encoding/base64";
 
@@ -10,7 +11,7 @@ const CORS = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-const PROMPT = `You are an expert resume writer. Rewrite the attached resume so it is tailored to the job description below.
+const TAILOR_PROMPT = `You are an expert resume writer. Rewrite the attached resume so it is tailored to the job description below.
 
 Rules:
 - Never invent experience, employers, dates, degrees or skills that are not in the original resume. You may reword, reorder, emphasize and de-emphasize only.
@@ -21,6 +22,38 @@ Rules:
 
 JOB DESCRIPTION:
 `;
+
+const EXTRACT_PROMPT = `Extract the content of the attached resume into JSON with EXACTLY this shape (all keys present; empty string / empty array when the resume has no such information — never invent anything):
+
+{
+  "profile": {
+    "name": "full name",
+    "title": "professional title, e.g. Java Full Stack Engineer",
+    "tagline": "short skills tagline, e.g. Spring Boot · AWS · Microservices",
+    "location": "city, country",
+    "phone": "phone number",
+    "email": "email address",
+    "linkedin": "linkedin url without https://, e.g. linkedin.com/in/xyz",
+    "years": "total years of experience as a 2-digit string, e.g. 05",
+    "summary": "3-4 sentence professional summary in first person"
+  },
+  "skills": [{ "cat": "category, e.g. Languages", "spec": "items separated by ' · '" }],
+  "jobs": [{
+    "period": "e.g. 05 / 2024 — PRESENT",
+    "role": "job title",
+    "company": "employer",
+    "place": "city, country",
+    "project": "one-line project or product description",
+    "current": false,
+    "points": ["achievement bullet", "..."],
+    "tech": ["Tech1", "Tech2"]
+  }],
+  "awards": [{ "year": "YYYY", "title": "award title", "from": "issuer" }],
+  "education": [{ "period": "e.g. 2017 — 2020", "degree": "degree name", "from": "institution" }],
+  "languages": "spoken languages, e.g. English (fluent) · Urdu (native)"
+}
+
+Jobs must be ordered most recent first, with "current": true only for a present-day role. Output ONLY the JSON object.`;
 
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
@@ -34,13 +67,16 @@ Deno.serve(async (req) => {
     });
 
   try {
-    const { jobDescription, resumeUrl } = await req.json();
+    const { jobDescription, resumeUrl, mode } = await req.json();
+    const extracting = mode === "extract";
 
-    if (!jobDescription || jobDescription.trim().length < 50) {
-      return json({ error: "Please paste the full job description (at least a few sentences)." }, 400);
-    }
-    if (jobDescription.length > 20000) {
-      return json({ error: "Job description is too long." }, 400);
+    if (!extracting) {
+      if (!jobDescription || jobDescription.trim().length < 50) {
+        return json({ error: "Please paste the full job description (at least a few sentences)." }, 400);
+      }
+      if (jobDescription.length > 20000) {
+        return json({ error: "Job description is too long." }, 400);
+      }
     }
 
     // Only fetch resumes from this project's own public storage bucket.
@@ -49,7 +85,7 @@ Deno.serve(async (req) => {
       return json({ error: "Invalid resume URL." }, 400);
     }
     if (!resumeUrl.toLowerCase().endsWith(".pdf")) {
-      return json({ error: "Tailoring currently works with PDF resumes. Please upload your resume as a PDF." }, 400);
+      return json({ error: "This works with PDF resumes. Please upload your resume as a PDF." }, 400);
     }
 
     const pdfResponse = await fetch(resumeUrl);
@@ -79,10 +115,13 @@ Deno.serve(async (req) => {
         {
           parts: [
             { inline_data: { mime_type: "application/pdf", data: encodeBase64(pdfBytes) } },
-            { text: PROMPT + jobDescription },
+            { text: extracting ? EXTRACT_PROMPT : TAILOR_PROMPT + jobDescription },
           ],
         },
       ],
+      ...(extracting
+        ? { generationConfig: { response_mime_type: "application/json" } }
+        : {}),
     });
 
     let geminiResponse: Response | null = null;
@@ -109,18 +148,26 @@ Deno.serve(async (req) => {
     }
 
     const data = await geminiResponse.json();
-    const tailored = (data.candidates?.[0]?.content?.parts ?? [])
+    const text = (data.candidates?.[0]?.content?.parts ?? [])
       .map((p: { text?: string }) => p.text ?? "")
       .join("")
       .trim();
 
-    if (!tailored) {
+    if (!text) {
       return json({ error: "The AI returned an empty result — try again." }, 502);
     }
 
-    return json({ tailored });
+    if (extracting) {
+      try {
+        return json({ data: JSON.parse(text) });
+      } catch {
+        console.error("Extract: invalid JSON from model:", text.slice(0, 400));
+        return json({ error: "Could not parse your resume — try again." }, 502);
+      }
+    }
+    return json({ tailored: text });
   } catch (err) {
     console.error(err);
-    return json({ error: "Unexpected error while tailoring the resume." }, 500);
+    return json({ error: "Unexpected error." }, 500);
   }
 });

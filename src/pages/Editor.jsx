@@ -18,6 +18,31 @@ function toEditable(data) {
   }
 }
 
+// Coerce AI-extracted resume data into the exact shape the form expects.
+function normalizeExtracted(raw) {
+  const str = (v) => (typeof v === 'string' ? v : '')
+  const arr = (v) => (Array.isArray(v) ? v : [])
+  const p = raw?.profile || {}
+  return {
+    profile: {
+      name: str(p.name), title: str(p.title), tagline: str(p.tagline),
+      location: str(p.location), phone: str(p.phone), email: str(p.email),
+      linkedin: str(p.linkedin), years: str(p.years), summary: str(p.summary),
+    },
+    skills: arr(raw?.skills).map((s) => ({ cat: str(s?.cat), spec: str(s?.spec) })),
+    jobs: arr(raw?.jobs).map((j) => ({
+      period: str(j?.period), role: str(j?.role), company: str(j?.company),
+      place: str(j?.place), project: str(j?.project), current: Boolean(j?.current),
+      points: arr(j?.points).map(str).filter(Boolean),
+      tech: arr(j?.tech).map(str).filter(Boolean),
+    })),
+    awards: arr(raw?.awards).map((a) => ({ year: str(a?.year), title: str(a?.title), from: str(a?.from) })),
+    education: arr(raw?.education).map((e) => ({ period: str(e?.period), degree: str(e?.degree), from: str(e?.from) })),
+    languages: str(raw?.languages),
+    resumeUrl: '',
+  }
+}
+
 function toStorable(data) {
   return {
     ...data,
@@ -50,6 +75,48 @@ export default function Editor() {
   const [error, setError] = useState('')
   const [busy, setBusy] = useState(false)
   const [showPreview, setShowPreview] = useState(false)
+  const [uploadedResume, setUploadedResume] = useState(null)
+  const [filling, setFilling] = useState(false)
+
+  useEffect(() => {
+    supabase.storage
+      .from('resumes')
+      .list(userId)
+      .then(({ data: files }) => {
+        const file = files?.[0]
+        if (file && file.name.toLowerCase().endsWith('.pdf')) {
+          setUploadedResume(
+            supabase.storage.from('resumes').getPublicUrl(`${userId}/${file.name}`).data
+              .publicUrl
+          )
+        }
+      })
+  }, [userId])
+
+  async function fillFromResume() {
+    setError('')
+    setFilling(true)
+    try {
+      const { data: res, error: fnError } = await supabase.functions.invoke('tailor-resume', {
+        body: { mode: 'extract', resumeUrl: uploadedResume },
+      })
+      if (fnError) {
+        let message = 'Could not read the resume — fill the form manually.'
+        try {
+          const body = await fnError.context?.json()
+          if (body?.error) message = body.error
+        } catch { /* keep generic message */ }
+        setError(message)
+        return
+      }
+      const normalized = normalizeExtracted(res.data)
+      normalized.resumeUrl = uploadedResume
+      setData(toEditable(normalized))
+      if (normalized.profile.name) setTitle(`${normalized.profile.name} — main`)
+    } finally {
+      setFilling(false)
+    }
+  }
 
   useEffect(() => {
     if (!isEdit) return
@@ -194,6 +261,18 @@ export default function Editor() {
         </div>
       </div>
       {error && <div className="form-error">{error}</div>}
+
+      {uploadedResume && (
+        <div className="autofill-banner">
+          <span>
+            <strong>Resume found.</strong> Let the AI fill this whole form from your uploaded
+            resume — then review and adjust anything before {isEdit ? 'saving' : 'creating'}.
+          </span>
+          <button className="btn-primary-sm" onClick={fillFromResume} disabled={filling}>
+            {filling ? 'Reading resume…' : 'Auto-fill from resume'}
+          </button>
+        </div>
+      )}
 
       <div className="form">
         <label className="field">
