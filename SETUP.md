@@ -34,7 +34,16 @@ npm install
 npm run dev
 ```
 
-## 3. Vercel (hosting)
+## 3. AI resume tailoring (free — Gemini + Edge Function)
+
+1. Get a free Gemini API key: https://aistudio.google.com → sign in with any Google account → **Get API key** → Create API key. No credit card needed; the free tier allows plenty of requests per day for this feature.
+2. Deploy the Edge Function (one time), easiest via the dashboard:
+   - Supabase → **Edge Functions** → **Deploy a new function** → name it exactly `tailor-resume` → paste the contents of [`supabase/functions/tailor-resume/index.ts`](supabase/functions/tailor-resume/index.ts) → deploy.
+   - Leave **Verify JWT** enabled (default) so only signed-in users can call it.
+3. Add the secret: Edge Functions → **Secrets** (or Project Settings → Edge Functions) → add `GEMINI_API_KEY` = your key.
+4. That's it — the **Tailor** page in the app now works. Requires the user's resume to be uploaded as a **PDF**.
+
+## 4. Vercel (hosting)
 
 1. https://vercel.com → sign up with GitHub → **Add New → Project** → import `FaaridMuhammadEmad/craftedby`.
 2. **Set the project name to `craftedby`** (this claims https://craftedby.vercel.app).

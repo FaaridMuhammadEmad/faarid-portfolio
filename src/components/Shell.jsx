@@ -51,6 +51,7 @@ export default function Shell() {
           <NavLink to="/templates">Templates</NavLink>
           {session && <NavLink to="/dashboard">My portfolios</NavLink>}
           {session && <NavLink to="/resume">Resume</NavLink>}
+          {session && <NavLink to="/tailor">Tailor</NavLink>}
         </nav>
         <div className="nav-auth">
           {session ? (

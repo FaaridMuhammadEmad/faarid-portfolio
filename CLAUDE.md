@@ -11,6 +11,8 @@ Portfolio builder web app ("craftedBy" brand, `craftedby` machine name). Users s
 - No SMS/phone verification anywhere (keeps the app free to run). Signup collects gender, date of birth, country and city into `profiles`. Email OTP + password reset ride on Supabase auth email; note this project issues 8-digit OTP codes.
 - Schema changes for existing installs go in `supabase/migrations/` as numbered files the user runs manually in the SQL Editor; `schema.sql` stays current for fresh installs.
 
+- AI resume tailoring runs in the `tailor-resume` Supabase Edge Function (`supabase/functions/`), calling the **Gemini API free tier** (user's explicit choice to stay $0 — not Anthropic; key lives in the `GEMINI_API_KEY` function secret, deployed manually via dashboard, "Verify JWT" on). PDF resumes only.
+
 ## Key layout
 
 - `src/templates/` — portfolio template components; each renders purely from a `data` prop. Registry in `src/lib/templates.js`, sample data in `src/lib/sampleData.js`.

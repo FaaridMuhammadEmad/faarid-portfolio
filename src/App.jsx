@@ -13,6 +13,7 @@ import Templates from './pages/Templates'
 import Preview from './pages/Preview'
 import Editor from './pages/Editor'
 import Resume from './pages/Resume'
+import Tailor from './pages/Tailor'
 import PublicPortfolio from './pages/PublicPortfolio'
 import NotFound from './pages/NotFound'
 
@@ -42,6 +43,14 @@ export default function App() {
               element={
                 <ProtectedRoute>
                   <Resume />
+                </ProtectedRoute>
+              }
+            />
+            <Route
+              path="/tailor"
+              element={
+                <ProtectedRoute>
+                  <Tailor />
                 </ProtectedRoute>
               }
             />

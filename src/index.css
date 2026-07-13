@@ -287,6 +287,15 @@ code {
 }
 .banner-close:hover { border-color: var(--red); color: var(--red); }
 
+/* ---- tailor ---- */
+.tailor-result { margin-top: 28px; }
+.tailor-text {
+  border: 1px solid var(--line); background: var(--field-deep);
+  padding: 20px; white-space: pre-wrap; word-wrap: break-word;
+  font-family: 'Archivo', sans-serif; font-size: 14px; line-height: 1.6;
+  max-height: 60vh; overflow-y: auto;
+}
+
 /* ---- 404 ---- */
 .notfound { text-align: center; }
 .nf-code {
