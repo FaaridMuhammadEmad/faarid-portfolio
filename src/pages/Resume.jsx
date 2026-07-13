@@ -59,7 +59,7 @@ export default function Resume() {
         setError(uploadError.message)
         return
       }
-      setInfo('Résumé uploaded.')
+      setInfo('Resume uploaded.')
       await refresh()
     } finally {
       setBusy(false)
@@ -67,7 +67,7 @@ export default function Resume() {
   }
 
   async function onDelete(name) {
-    if (!window.confirm('Delete your uploaded résumé?')) return
+    if (!window.confirm('Delete your uploaded resume?')) return
     setError('')
     setInfo('')
     const { error: removeError } = await supabase.storage
@@ -75,7 +75,7 @@ export default function Resume() {
       .remove([`${userId}/${name}`])
     if (removeError) setError(removeError.message)
     else {
-      setInfo('Résumé deleted. Portfolios that linked it will stop showing the button next time you edit them.')
+      setInfo('Resume deleted. Portfolios that linked it will stop showing the button next time you edit them.')
       await refresh()
     }
   }
@@ -87,14 +87,14 @@ export default function Resume() {
 
   return (
     <div className="card">
-      <h1>Résumé</h1>
+      <h1>Resume</h1>
       <p className="muted">
-        Upload one résumé (PDF/DOC/DOCX, max 5 MB). Its public link can be attached to any of
-        your portfolios from the editor, shown as a "Résumé" button.
+        Upload one resume (PDF/DOC/DOCX, max 5 MB). Its public link can be attached to any of
+        your portfolios from the editor, shown as a "Resume" button.
       </p>
 
       <label className="btn-primary file-btn">
-        {busy ? 'Uploading…' : files.length ? 'Replace résumé' : 'Upload résumé'}
+        {busy ? 'Uploading…' : files.length ? 'Replace resume' : 'Upload resume'}
         <input type="file" accept=".pdf,.doc,.docx" onChange={onUpload} disabled={busy} hidden />
       </label>
 

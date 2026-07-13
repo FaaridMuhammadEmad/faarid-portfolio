@@ -44,7 +44,7 @@ export default function Landing() {
         <div className="step">
           <div className="step-no">02</div>
           <h3>Craft</h3>
-          <p>Pick a template, fill in your experience, skills and education. Attach your résumé.</p>
+          <p>Pick a template, fill in your experience, skills and education. Attach your resume.</p>
         </div>
         <div className="step">
           <div className="step-no">03</div>

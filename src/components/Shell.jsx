@@ -16,9 +16,10 @@ function PricingNotice({ session }) {
   }
   return (
     <div className="pricing-banner" role="status">
-      <span>
-        <strong>Early access:</strong> craftedBy is free until <strong>15 August 2026</strong> —
-        after that, $10 / month.
+      <span className="banner-tag">Early access</span>
+      <span className="banner-text">
+        Everything unlocked, on the house — until <strong className="hl">15 August 2026</strong>.
+        Craft your best work now; it's <strong className="hl">$10/month</strong> after.
       </span>
       <button className="banner-close" onClick={close} aria-label="Dismiss notice">
         ✕
@@ -49,7 +50,7 @@ export default function Shell() {
         <nav className="nav-links">
           <NavLink to="/templates">Templates</NavLink>
           {session && <NavLink to="/dashboard">My portfolios</NavLink>}
-          {session && <NavLink to="/resume">Résumé</NavLink>}
+          {session && <NavLink to="/resume">Resume</NavLink>}
         </nav>
         <div className="nav-auth">
           {session ? (

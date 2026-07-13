@@ -98,7 +98,7 @@ export default function Editor() {
       return
     }
     if (!files?.length) {
-      setError('No résumé uploaded yet — add one on the Résumé page first.')
+      setError('No resume uploaded yet — add one on the Resume page first.')
       return
     }
     const url = supabase.storage
@@ -242,12 +242,12 @@ export default function Editor() {
           />
         </label>
 
-        <h2>Résumé button</h2>
+        <h2>Resume button</h2>
         <div className="inline-actions">
           {data.resumeUrl ? (
             <>
               <a href={data.resumeUrl} target="_blank" rel="noreferrer">
-                Attached résumé ↗
+                Attached resume ↗
               </a>
               <button
                 className="btn-link danger"
@@ -258,7 +258,7 @@ export default function Editor() {
             </>
           ) : (
             <button className="btn-ghost-sm" onClick={attachResume}>
-              Attach uploaded résumé
+              Attach uploaded resume
             </button>
           )}
         </div>

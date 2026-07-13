@@ -130,7 +130,7 @@ export default function Blueprint({ data }) {
             )}
             {resumeUrl && (
               <a className="btn btn-ghost" href={resumeUrl} target="_blank" rel="noreferrer">
-                Résumé ↗
+                Resume ↗
               </a>
             )}
             {profile.linkedin && (
