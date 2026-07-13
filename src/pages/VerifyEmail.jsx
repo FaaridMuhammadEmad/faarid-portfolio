@@ -61,8 +61,8 @@ export default function VerifyEmail() {
     <div className="card narrow">
       <h1>Verify your email</h1>
       <p className="muted">
-        We sent a 6-digit code to <strong>{email || 'your email'}</strong>. Enter it below —
-        or click the link in the email, either works.
+        We sent a verification code to <strong>{email || 'your email'}</strong>. Enter it
+        below.
       </p>
       <form onSubmit={onSubmit} className="form">
         <label className="field">
@@ -71,7 +71,7 @@ export default function VerifyEmail() {
             type="text"
             inputMode="numeric"
             autoComplete="one-time-code"
-            maxLength={6}
+            maxLength={10}
             required
             value={token}
             onChange={(e) => setToken(e.target.value)}
